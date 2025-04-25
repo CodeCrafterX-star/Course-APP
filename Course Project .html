@@ -1,0 +1,1133 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Course App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <!-- Parallax Background -->
+    <div class="parallax-bg"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <h1>Course App</h1>
+        <div class="nav-right">
+            <ul>
+                <li><a href="#" class="active">Home</a></li>
+                <li><a href="#">Courses</a></li>
+                <li><a href="#">About</a></li>
+            </ul>
+            <!-- Search Input and Button -->
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search courses..." />
+                <button id="search-btn" class="search-btn">🔍</button>
+            </div>
+            <button id="theme-toggle" class="theme-toggle">🌙</button>
+            <!-- Fullscreen Toggle Button -->
+            <button id="fullscreen-toggle" class="fullscreen-toggle">⛶</button>
+        </div>
+    </nav>
+
+    <!-- Course Details Section -->
+    <section class="course-details" id="course-details">
+        <h2>Course Details</h2>
+        <div id="details-content">
+            <p>Select a course to view details.</p>
+        </div>
+    </section>
+
+    <!-- Course List Section -->
+    <section class="course-list">
+        <h2>Available Courses</h2>
+        <div id="courses" class="courses-container">
+            <p>Loading courses... If this message persists, JavaScript may not be running. Check the console (F12) for errors.</p>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html><style>* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+    background: #e0e7ff;
+    color: #1f2a44;
+    transition: background 0.5s ease, color 0.5s ease;
+    width: 100vw;
+    min-height: 100vh; /* Allow content to extend beyond viewport */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
+    margin: 0;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); /* Respect safe areas */
+}
+
+body.dark {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+/* Parallax Background */
+.parallax-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+    z-index: -1;
+    animation: subtleFade 10s ease-in-out infinite;
+}
+
+@keyframes subtleFade {
+    0% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+/* Navigation Bar */
+.navbar {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    backdrop-filter: blur(12px);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-radius: 0 0 12px 12px;
+}
+
+.dark .navbar {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.3), rgba(30, 41, 59, 0.2));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.navbar h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    background: linear-gradient(45deg, #6366f1, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
+
+.navbar ul li {
+    margin-left: 1rem;
+}
+
+/* Navigation Bar Button Styles */
+.navbar ul li a {
+    color: #1f2a44;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1;
+}
+
+.dark .navbar ul li a {
+    color: #e2e8f0;
+}
+
+.navbar ul li a:hover,
+.navbar ul li a.active {
+    color: white;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5), 0 0 20px rgba(168, 85, 247, 0.3);
+    background: linear-gradient(45deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+}
+
+.navbar ul li a.active {
+    font-weight: 600;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    background: linear-gradient(145deg, #e0e7ff, #c7d2fe);
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0.6rem;
+    border-radius: 50%;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.dark .theme-toggle {
+    background: linear-gradient(145deg, #1e293b, #334155);
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.1);
+}
+
+.theme-toggle:hover {
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.7);
+    background: linear-gradient(145deg, #c7d2fe, #e0e7ff);
+}
+
+.dark .theme-toggle:hover {
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4), -3px -3px 8px rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, #334155, #1e293b);
+}
+
+/* Fullscreen Toggle Button */
+.fullscreen-toggle {
+    background: linear-gradient(145deg, #e0e7ff, #c7d2fe);
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0.6rem;
+    border-radius: 50%;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.dark .fullscreen-toggle {
+    background: linear-gradient(145deg, #1e293b, #334155);
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.1);
+}
+
+.fullscreen-toggle:hover {
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.7);
+    background: linear-gradient(145deg, #c7d2fe, #e0e7ff);
+}
+
+.dark .fullscreen-toggle:hover {
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4), -3px -3px 8px rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, #334155, #1e293b);
+}
+
+/* Search Container */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.search-container:hover {
+    transform: translateY(-2px);
+}
+
+/* Search Input */
+#search-input {
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #ffffff, #e0e7ff);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.5);
+    color: #1f2a44;
+    transition: all 0.3s ease;
+}
+
+.dark #search-input {
+    background: linear-gradient(145deg, #334155, #1e293b);
+    color: #e2e8f0;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(255, 255, 255, 0.1);
+}
+
+#search-input::placeholder {
+    color: #64748b;
+}
+
+.dark #search-input::placeholder {
+    color: #94a3b8;
+}
+
+#search-input:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.5), 0 0 16px rgba(168, 85, 247, 0.3);
+    transform: scale(1.02);
+}
+
+/* Search Button */
+.search-btn {
+    background: linear-gradient(145deg, #e0e7ff, #c7d2fe);
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.6rem;
+    border-radius: 50%;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.dark .search-btn {
+    background: linear-gradient(145deg, #1e293b, #334155);
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.1);
+}
+
+.search-btn:hover {
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2), -3px -3px 8px rgba(255, 255, 255, 0.7);
+    background: linear-gradient(145deg, #c7d2fe, #e0e7ff);
+}
+
+.dark .search-btn:hover {
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4), -3px -3px 8px rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, #334155, #1e293b);
+}
+
+/* Course List Section */
+.course-list {
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.course-list h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    background: linear-gradient(45deg, #6366f1, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.courses-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: auto; /* Allow container to grow with content */
+}
+
+.course-card {
+    background: linear-gradient(145deg, #ffffff, #e0e7ff);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1), -8px -8px 16px rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dark .course-card {
+    background: linear-gradient(145deg, #1e293b, #334155);
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.1);
+}
+
+.course-card:hover {
+    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.2), -12px -12px 24px rgba(255, 255, 255, 0.7);
+    background: linear-gradient(145deg, #e0e7ff, #d1dbfa);
+}
+
+.dark .course-card:hover {
+    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.4), -12px -12px 24px rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, #334155, #2a344b);
+}
+
+.course-card h3 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    color: #1f2a44;
+}
+
+.dark .course-card h3 {
+    color: #e2e8f0;
+}
+
+.course-card p {
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.dark .course-card p {
+    color: #94a3b8;
+}
+
+/* Course Details Section */
+.course-details {
+    padding: 2.5rem;
+    text-align: center;
+    background: linear-gradient(145deg, #ffffff, #e0e7ff);
+    margin: 2rem auto;
+    border-radius: 16px;
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1), -8px -8px 16px rgba(255, 255, 255, 0.5);
+    max-width: 900px;
+    position: relative;
+    backdrop-filter: blur(8px);
+}
+
+.dark .course-details {
+    background: linear-gradient(145deg, #1e293b, #334155);
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.1);
+}
+
+.course-details h2 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(45deg, #6366f1, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.course-details p {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin-bottom: 0.8rem;
+}
+
+.dark .course-details p {
+    color: #94a3b8;
+}
+
+/* View Course Button */
+.view-course-btn {
+    margin-top: 1rem;
+    padding: 1rem 2.5rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #ffffff;
+    background: linear-gradient(45deg, #6366f1, #a855f7);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(255, 255, 255, 0.5);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.dark .view-course-btn {
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.1);
+}
+
+.view-course-btn:hover {
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2), -8px -8px 16px rgba(255, 255, 255, 0.7);
+    background: linear-gradient(45deg, #a855f7, #6366f1);
+}
+
+.dark .view-course-btn:hover {
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.4), -8px -8px 16px rgba(255, 255, 255, 0.2);
+}
+
+.view-course-btn:active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: ripple 0.6s ease-out forwards;
+}
+
+@keyframes ripple {
+    to {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+    }
+}
+
+/* Progress Bar Styles */
+.progress-container {
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 10px;
+    background: linear-gradient(45deg, #6366f1, #a855f7);
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+    animation: fillProgress 1s ease-in-out forwards;
+}
+
+.progress-bar.update {
+    animation: glowUpdate 0.5s ease-in-out;
+}
+
+@keyframes fillProgress {
+    from { width: 0; }
+    to { width: inherit; }
+}
+
+@keyframes glowUpdate {
+    0% { box-shadow: none; }
+    50% { box-shadow: 0 0 10px rgba(99, 102, 241, 0.8), 0 0 20px rgba(168, 85, 247, 0.5); }
+    100% { box-shadow: none; }
+}
+
+.progress-text {
+    display: block;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.dark .progress-text {
+    color: #94a3b8;
+}
+
+/* Modal Styles */
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    margin: 0;
+    padding: 0;
+}
+
+.modal-content {
+    background: linear-gradient(145deg, #ffffff, #e0e7ff);
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    margin: 0;
+    padding: 2rem;
+    border-radius: 16px;
+    position: relative;
+    text-align: center;
+    overflow-y: auto; /* Allow scrolling within modal */
+}
+
+.dark .modal-content {
+    background: linear-gradient(145deg, #1e293b, #334155);
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #1f2a44;
+    z-index: 1001;
+}
+
+.dark .modal-close {
+    color: #e2e8f0;
+}
+
+.modal-content h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    margin-top: 0;
+    background: linear-gradient(45deg, #6366f1, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.modal-content ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.modal-content li {
+    font-size: 1.5rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    background: rgba(99, 102, 241, 0.1);
+    transition: background 0.3s ease;
+    cursor: pointer;
+}
+
+.modal-content li:hover {
+    background: rgba(99, 102, 241, 0.2);
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    margin: 0 auto;
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 1rem;
+        max-height: 90vh;
+    }
+
+    .modal-content h2 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-content li {
+        font-size: 1.2rem;
+        margin: 0.5rem 0;
+        padding: 0.8rem;
+    }
+
+    .video-container {
+        padding-bottom: 56.25%; /* Maintain aspect ratio */
+    }
+}
+
+/* Animations for entering elements */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.course-card, .course-details {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .nav-right {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .navbar ul li {
+        margin: 0 0.5rem;
+    }
+
+    .search-container {
+        width: 100%;
+        justify-content: center;
+        gap: 0.8rem;
+    }
+
+    #search-input {
+        width: 100%;
+        max-width: 200px;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    #search-input:focus {
+        transform: scale(1.01);
+    }
+
+    .search-btn {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .courses-container {
+        grid-template-columns: 1fr;
+    }
+
+    .course-details {
+        margin: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .view-course-btn {
+        padding: 0.8rem 2rem;
+        font-size: 1rem;
+    }
+
+    .progress-container {
+        max-width: 250px;
+    }
+
+    .progress-text {
+        font-size: 0.8rem;
+    }
+}</style><script>// Sample course data with default progress
+const courses = [
+    {
+        id: 1,
+        title: "Mobile App Development",
+        description: "Learn to build Android and iOS apps using Flutter and React Native.",
+        instructor: "Sarah Johnson",
+        duration: "8 weeks",
+        level: "Intermediate",
+        progress: 75
+    },
+    {
+        id: 2,
+        title: "HTML Full Course",
+        description: "Master HTML5 for creating semantic and accessible web pages.",
+        instructor: "Michael Chen",
+        duration: "4 weeks",
+        level: "Beginner",
+        progress: 20
+    },
+    {
+        id: 3,
+        title: "JavaScript Full Course",
+        description: "Explore JavaScript for dynamic and interactive web applications.",
+        instructor: "Emily Davis",
+        duration: "6 weeks",
+        level: "Beginner",
+        progress: 50
+    },
+    {
+        id: 4,
+        title: "CSS Full Course",
+        description: "Dive into CSS3 for styling modern, responsive websites.",
+        instructor: "David Lee",
+        duration: "5 weeks",
+        level: "Beginner",
+        progress: 0
+    },
+    {
+        id: 5,
+        title: "Full Stack Development",
+        description: "Become a full stack developer with Node.js, Express, and MongoDB.",
+        instructor: "Laura Martinez",
+        duration: "10 weeks",
+        level: "Advanced",
+        progress: 90
+    }
+];
+
+// Load Vimeo Player API globally
+const vimeoScript = document.createElement('script');
+vimeoScript.src = 'https://player.vimeo.com/api/player.js';
+vimeoScript.async = true;
+document.head.appendChild(vimeoScript);
+
+// Load saved progress from localStorage
+function loadProgress() {
+    try {
+        const savedProgress = localStorage.getItem('courseProgress');
+        if (savedProgress) {
+            const progressMap = JSON.parse(savedProgress);
+            courses.forEach(course => {
+                if (progressMap[course.id] !== undefined) {
+                    course.progress = Math.max(0, Math.min(100, progressMap[course.id]));
+                }
+            });
+        }
+    } catch (e) {
+        console.warn("Failed to load progress from localStorage:", e.message);
+    }
+}
+
+// Save progress to localStorage
+function saveProgress() {
+    try {
+        const progressMap = {};
+        courses.forEach(course => {
+            progressMap[course.id] = course.progress;
+        });
+        localStorage.setItem('courseProgress', JSON.stringify(progressMap));
+    } catch (e) {
+        console.warn("Failed to save progress to localStorage:", e.message);
+    }
+}
+
+// Populate course list
+const coursesContainer = document.getElementById('courses');
+const detailsContent = document.getElementById('details-content');
+
+function displayCourses(filteredCourses = courses) {
+    if (!coursesContainer) {
+        console.error("Courses container not found! Ensure <div id='courses' class='courses-container'> exists in the HTML.");
+        return;
+    }
+
+    coursesContainer.innerHTML = '';
+
+    if (filteredCourses.length === 0) {
+        coursesContainer.innerHTML = '<p>No courses found matching your search.</p>';
+        return;
+    }
+    
+    filteredCourses.forEach(course => {
+        const courseCard = document.createElement('div');
+        courseCard.classList.add('course-card');
+        courseCard.innerHTML = `
+            <h3>${course.title}</h3>
+            <p>${course.description}</p>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: ${course.progress}%"></div>
+                <span class="progress-text">${course.progress}% Complete</span>
+            </div>
+        `;
+        courseCard.addEventListener('click', () => displayCourseDetails(course));
+        coursesContainer.appendChild(courseCard);
+    });
+}
+
+// Search courses by title or description
+function searchCourses() {
+    const searchInput = document.getElementById('search-input');
+    const query = searchInput.value.trim().toLowerCase();
+
+    const filteredCourses = courses.filter(course => 
+        course.title.toLowerCase().includes(query) || 
+        course.description.toLowerCase().includes(query)
+    );
+
+    displayCourses(filteredCourses);
+}
+
+// Create and manage a modal for language selection
+function createModal(course) {
+    // Remove any existing modal
+    const existingModal = document.querySelector('.modal');
+    if (existingModal) existingModal.remove();
+
+    // Disable body scrolling
+    document.body.style.overflow = 'hidden';
+
+    // Create modal elements
+    const modal = document.createElement('div');
+    modal.classList.add('modal');
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="modal-close">×</span>
+            <div id="modal-body">
+                <h2>${course.title} - Available Languages</h2>
+                <ul id="language-list">
+                    <li data-lang="Hindi">Hindi</li>
+                    <li data-lang="English">English</li>
+                </ul>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Close modal on click
+    const closeBtn = modal.querySelector('.modal-close');
+    closeBtn.addEventListener('click', () => {
+        modal.remove();
+        // Re-enable body scrolling
+        document.body.style.overflow = 'auto';
+    });
+
+    // Handle language selection
+    const languageList = modal.querySelector('#language-list');
+    const modalBody = modal.querySelector('#modal-body');
+    languageList.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.tagName === 'LI') {
+            const language = target.dataset.lang;
+            if (course.title === "HTML Full Course") {
+                if (language === 'Hindi') {
+                    modalBody.innerHTML = `
+                        <h2>${course.title} - Hindi</h2>
+                        <div class="video-container">
+                            <iframe id="vimeo-player" src="https://player.vimeo.com/video/1077848693?h=058f97d6db&badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="HTML_Tutorial_For_Beginners_In_Hindi__With_Notes__�(1080p)"></iframe>
+                        </div>
+                    `;
+                    // Initialize Vimeo player for progress tracking
+                    setTimeout(() => initializeVimeoPlayer(course), 500); // Delay to ensure iframe loads
+                } else if (language === 'English') {
+                    modalBody.innerHTML = `
+                        <h2>${course.title} - English</h2>
+                        <div class="video-container">
+                            <iframe id="vimeo-player" src="https://player.vimeo.com/video/1078173125?h=415020c76d&badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="videoplayback"></iframe>
+                        </div>
+                    `;
+                    // Initialize Vimeo player for progress tracking
+                    setTimeout(() => initializeVimeoPlayer(course), 500); // Delay to ensure iframe loads
+                }
+            } else {
+                modalBody.innerHTML = `<h2>${course.title} - ${language}</h2><p>Content in ${language} is not available yet.</p>`;
+            }
+        }
+    });
+}
+
+// Initialize Vimeo player and track progress
+function initializeVimeoPlayer(course) {
+    if (typeof Vimeo === 'undefined') {
+        console.warn("Vimeo Player API not loaded yet. Retrying...");
+        setTimeout(() => initializeVimeoPlayer(course), 500);
+        return;
+    }
+
+    const iframe = document.getElementById('vimeo-player');
+    if (!iframe) {
+        console.error("Vimeo iframe not found!");
+        return;
+    }
+
+    const player = new Vimeo.Player(iframe);
+
+    // Debounce progress updates to avoid excessive calls
+    let lastUpdateTime = 0;
+    const debounceDelay = 1000; // Update every 1 second
+
+    player.on('timeupdate', (data) => {
+        const currentTime = Date.now();
+        if (currentTime - lastUpdateTime < debounceDelay) return;
+
+        const percent = Math.round((data.percent * 100) * 10) / 10; // Round to 1 decimal
+        if (percent > course.progress) {
+            course.progress = Math.min(100, percent);
+            saveProgress();
+            displayCourses(); // Update course cards
+            displayCourseDetails(course); // Refresh details
+
+            // Add glow animation to progress bar
+            const progressBars = document.querySelectorAll(`.progress-bar[style*="width: ${course.progress}%"]`);
+            progressBars.forEach(bar => {
+                bar.classList.add('update');
+                setTimeout(() => bar.classList.remove('update'), 500);
+            });
+        }
+
+        lastUpdateTime = currentTime;
+    });
+
+    // Clean up player events when modal closes
+    const modal = document.querySelector('.modal');
+    const closeBtn = modal.querySelector('.modal-close');
+    closeBtn.addEventListener('click', () => {
+        player.off('timeupdate');
+    }, { once: true });
+}
+
+// Display course details with progress bar (no update buttons)
+function displayCourseDetails(course) {
+    if (!detailsContent) {
+        console.error("Details content not found! Ensure <div id='details-content'> exists in the HTML.");
+        return;
+    }
+    detailsContent.innerHTML = `
+        <h3>${course.title}</h3>
+        <p><strong>Description:</strong> ${course.description}</p>
+        <p><strong>Instructor:</strong> ${course.instructor}</p>
+        <p><strong>Duration:</strong> ${course.duration}</p>
+        <p><strong>Level:</strong> ${course.level}</p>
+        <div class="progress-container">
+            <div class="progress-bar" style="width: ${course.progress}%"></div>
+            <span class="progress-text">${course.progress}% Complete</span>
+        </div>
+        <button class="view-course-btn">View Course</button>
+    `;
+    
+    // Add event listener to the View Course button to show modal
+    const viewCourseBtn = detailsContent.querySelector('.view-course-btn');
+    if (viewCourseBtn) {
+        viewCourseBtn.addEventListener('click', () => {
+            createModal(course);
+        });
+    }
+
+    // Scroll to the Course Details section smoothly
+    const courseDetailsSection = document.getElementById('course-details');
+    if (courseDetailsSection) {
+        courseDetailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Dark mode toggle with local storage
+const themeToggle = document.getElementById('theme-toggle');
+if (themeToggle) {
+    let isDark = false;
+
+    // Add CSS for 3D Sun and Moon icons
+    const style = document.createElement('style');
+    style.textContent = `
+        #theme-toggle {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+        .theme-icon {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: absolute;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .sun-icon {
+            background: radial-gradient(circle, #ffd700 40%, #ff8c00 70%);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 165, 0, 0.5);
+            transform: rotateX(20deg) rotateY(20deg);
+            opacity: 0;
+        }
+        .moon-icon {
+            background: radial-gradient(circle at 70% 30%, #d3d3d3 40%, #a9a9a9 70%);
+            box-shadow: 0 0 15px rgba(211, 211, 211, 0.8), 0 0 30px rgba(169, 169, 169, 0.5);
+            transform: rotateX(20deg) rotateY(-20deg);
+            opacity: 1;
+        }
+        .moon-icon::before {
+            content: '';
+            position: absolute;
+            width: 60%;
+            height: 60%;
+            background: #e0e7ff;
+            border-radius: 50%;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: inset 5px -5px 10px rgba(0, 0, 0, 0.3);
+        }
+        .dark .sun-icon {
+            opacity: 1;
+        }
+        .dark .moon-icon {
+            opacity: 0;
+        }
+        @media (max-width: 768px) {
+            #theme-toggle {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Set initial icon state
+    themeToggle.innerHTML = `
+        <span class="theme-icon sun-icon"></span>
+        <span class="theme-icon moon-icon"></span>
+    `;
+
+    // Load saved theme
+    try {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark');
+            isDark = true;
+        }
+    } catch (e) {
+        console.warn("Failed to access localStorage for theme:", e.message);
+    }
+
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        isDark = document.body.classList.contains('dark');
+
+        try {
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        } catch (e) {
+            console.warn("Failed to save theme to localStorage:", e.message);
+        }
+    });
+}
+
+// Fullscreen toggle functionality
+const fullscreenToggle = document.getElementById('fullscreen-toggle');
+if (fullscreenToggle) {
+    fullscreenToggle.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    });
+
+    // Update button icon based on fullscreen state
+    document.addEventListener('fullscreenchange', () => {
+        fullscreenToggle.textContent = document.fullscreenElement ? '🛑' : '⛶';
+    });
+}
+
+// Navigation active state management and Courses button scroll
+const navLinks = document.querySelectorAll('.navbar ul li a');
+navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+
+        // Scroll to course-list when Courses is clicked
+        if (link.textContent === 'Courses') {
+            const courseList = document.querySelector('.course-list');
+            if (courseList) {
+                courseList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    });
+});
+
+// Search button event listener
+const searchBtn = document.getElementById('search-btn');
+const searchInput = document.getElementById('search-input');
+if (searchBtn && searchInput) {
+    searchBtn.addEventListener('click', searchCourses);
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchCourses();
+        }
+    });
+}
+
+// Initialize the app with a retry mechanism
+function initializeApp() {
+    if (document.getElementById('courses')) {
+        loadProgress(); // Load saved progress
+        displayCourses();
+    } else {
+        console.warn("Courses container not ready, retrying...");
+        setTimeout(initializeApp, 500);
+    }
+}
+
+// Run initialization with error handling
+try {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+    window.addEventListener('load', initializeApp);
+} catch (e) {
+    console.error("Initialization failed:", e.message);
+}</script>
